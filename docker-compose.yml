@@ -13,6 +13,11 @@ services:
       - "5432:5432"
     environment:
       <<: *env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U prodapp"]
+      interval: 1s
+      timeout: 1s
+      retries: 5
 
   backend:
     build:
@@ -24,7 +29,8 @@ services:
     ports:
       - "3001:3001"
     depends_on:
-      - database
+      database:
+        condition: service_healthy
     restart: on-failure
     environment:
       <<: *env
