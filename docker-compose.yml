@@ -1,0 +1,43 @@
+version: '3'
+
+x-environment: &env
+  POSTGRES_USER: prodapp
+  POSTGRES_PASSWORD: prodapp
+  POSTGRES_DB: prodapp
+
+
+services:
+  database:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      <<: *env
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    ports:
+      - "3001:3001"
+    depends_on:
+      - database
+    restart: on-failure
+    environment:
+      <<: *env
+
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      no_cache: true
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+      - "3010:3010"
